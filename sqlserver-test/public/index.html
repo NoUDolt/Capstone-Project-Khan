@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plateful – SQL Server Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Plateful – SQL Server Demo</h1>
+    <p>Basic CRUD: list, add, delete</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Add Item</h2>
+      <form id="add-form">
+        <div class="row"><label>Name</label><input id="name" required /></div>
+        <div class="row"><label>Quantity</label><input id="qty" type="number" min="0" value="1" required /></div>
+        <div class="row"><label>Expiration</label><input id="exp" type="date" /></div>
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Inventory</h2>
+      <table id="items">
+        <thead><tr><th>Id</th><th>Name</th><th>Qty</th><th>Expires</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer><small>Node + SQL Server + Vanilla JS</small></footer>
+  <script src="./app.js"></script>
+</body>
+</html>
