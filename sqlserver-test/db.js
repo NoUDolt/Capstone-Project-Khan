@@ -6,7 +6,7 @@ sql.on('error', err => console.error('MSSQL GLOBAL ERROR:', err, err?.originalEr
 const config = {
   driver: 'msnodesqlv8',
   connectionString:
-    'Driver={ODBC Driver 17 for SQL Server};' +   // <-- 17
+    'Driver={ODBC Driver 17 for SQL Server};' + 
     'Server=(localdb)\\MSSQLLocalDB;' +
     `Database=${process.env.SQL_DATABASE};` +
     'Trusted_Connection=Yes;' +
