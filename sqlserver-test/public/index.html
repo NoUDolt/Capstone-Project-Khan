@@ -2,37 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Plateful – SQL Server Demo</title>
+  <title>Plateful – Food Redistribution Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <h1>Plateful – SQL Server Demo</h1>
-    <p>Basic CRUD: list, add, delete</p>
+    <div class="header-content">
+      <div class="logo">🍽️</div>
+      <div>
+        <h1>Plateful</h1>
+        <p class="tagline">Connecting surplus food with communities in need</p>
+      </div>
+    </div>
   </header>
 
   <main>
-    <section class="card">
-      <h2>Add Item</h2>
-      <form id="add-form">
-        <div class="row"><label>Name</label><input id="name" required /></div>
-        <div class="row"><label>Quantity</label><input id="qty" type="number" min="0" value="1" required /></div>
-        <div class="row"><label>Expiration</label><input id="exp" type="date" /></div>
-        <button type="submit">Add</button>
-      </form>
-    </section>
+    <!-- Inventory Page -->
+    <div id="inventory-page" class="page active">
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="total-items">0</div>
+          <div class="stat-label">Items Available</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="expiring-soon">0</div>
+          <div class="stat-label">Expiring Soon</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="total-quantity">0</div>
+          <div class="stat-label">Total Quantity</div>
+        </div>
+      </div>
 
-    <section class="card">
-      <h2>Inventory</h2>
-      <table id="items">
-        <thead><tr><th>Id</th><th>Name</th><th>Qty</th><th>Expires</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
+      <section class="card">
+        <h2>
+          <div class="card-header">
+            <span class="icon">📦</span>
+            <span>Food Inventory</span>
+          </div>
+          <button class="btn-icon" id="add-btn" title="Add Food Item">➕</button>
+        </h2>
+        <table id="items">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Item Name</th>
+              <th>Quantity</th>
+              <th>Expiration Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- Add Item Page -->
+    <div id="add-page" class="page">
+      <section class="card">
+        <h2>
+          <div class="card-header">
+            <span class="icon">➕</span>
+            <span>Add Food Item</span>
+          </div>
+        </h2>
+        <form id="add-form" class="form-grid">
+          <div class="form-row">
+            <label for="name">Item Name</label>
+            <input id="name" placeholder="e.g., Fresh Bread, Vegetables" required />
+          </div>
+          <div class="form-row">
+            <label for="qty">Quantity</label>
+            <input id="qty" type="number" min="1" value="1" placeholder="Amount available" required />
+          </div>
+          <div class="form-row">
+            <label for="exp">Expiration Date</label>
+            <input id="exp" type="date" />
+          </div>
+          <button type="submit" class="btn-submit">Add to Inventory</button>
+          <button type="button" class="btn-submit" id="back-btn" style="background: #6b7280;">Back to Inventory</button>
+        </form>
+      </section>
+    </div>
   </main>
 
-  <footer><small>Node + SQL Server + Vanilla JS</small></footer>
-  <script src="./app.js"></script>
+  <footer>
+    <p>Plateful - Reducing food waste, one meal at a time | Built with Node.js + SQL Server</p>
+  </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>

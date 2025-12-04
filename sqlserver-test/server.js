@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const { getPool, sql } = require('./db');
@@ -58,3 +57,10 @@ app.delete('/api/food/:id', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server: http://localhost:${port}`));
+
+appendFile: TextDecoderStream
+
+app.use
+
+//sqllocaldb start MSSQLLocalDB
+//npm run dev
