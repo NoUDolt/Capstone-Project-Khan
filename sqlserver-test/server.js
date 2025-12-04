@@ -62,5 +62,7 @@ appendFile: TextDecoderStream
 
 app.use
 
+//On Windows Terminal command line run:
 //sqllocaldb start MSSQLLocalDB
+//On Visual Studio Code Bash terminal run:
 //npm run dev
