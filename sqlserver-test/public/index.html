@@ -4,92 +4,462 @@
   <meta charset="UTF-8" />
   <title>Plateful – Food Redistribution Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Plateful connects businesses with surplus food to local food banks, shelters, and communities in need. Reduce waste, feed communities." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <div class="header-content">
-      <div class="logo">🍽️</div>
-      <div>
-        <h1>Plateful</h1>
-        <p class="tagline">Connecting surplus food with communities in need</p>
-      </div>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-brand" data-page="dashboard">
+        <div class="nav-logo">🍽️</div>
+        <span class="nav-title">Plateful</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#" class="nav-link active" data-page="dashboard">Dashboard</a></li>
+        <li><a href="#" class="nav-link" data-page="donations">Donations</a></li>
+        <li><a href="#" class="nav-link" data-page="recipients">Recipients</a></li>
+        <li><a href="#" class="nav-link" data-page="alerts">Alerts</a></li>
+        <li><a href="#" class="nav-link" data-page="about">About</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
-  </header>
+  </nav>
 
-  <main>
-    <!-- Inventory Page -->
-    <div id="inventory-page" class="page active">
-      <div class="hero-stats">
-        <div class="stat-card">
-          <div class="stat-number" id="total-items">0</div>
-          <div class="stat-label">Items Available</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="expiring-soon">0</div>
-          <div class="stat-label">Expiring Soon</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="total-quantity">0</div>
-          <div class="stat-label">Total Quantity</div>
-        </div>
-      </div>
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
+    <a href="#" class="nav-link" data-page="donations">Donations</a>
+    <a href="#" class="nav-link" data-page="recipients">Recipients</a>
+    <a href="#" class="nav-link" data-page="alerts">Alerts</a>
+    <a href="#" class="nav-link" data-page="about">About</a>
+  </div>
 
-      <section class="card">
-        <h2>
-          <div class="card-header">
-            <span class="icon">📦</span>
-            <span>Food Inventory</span>
+  <main class="main-content">
+    <!-- ============ DASHBOARD PAGE ============ -->
+    <div id="dashboard-page" class="page active">
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-content">
+          <h1 class="hero-title">Connecting <span class="text-gradient">Surplus Food</span> with Communities in Need</h1>
+          <p class="hero-subtitle">Join the movement to reduce food waste and fight hunger in your community</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg" data-action="add-donation">
+              <span class="btn-icon">➕</span> Donate Food
+            </button>
+            <button class="btn btn-secondary btn-lg" data-page="recipients">
+              <span class="btn-icon">🏠</span> Find Recipients
+            </button>
           </div>
-          <button class="btn-icon" id="add-btn" title="Add Food Item">➕</button>
-        </h2>
-        <table id="items">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Item Name</th>
-              <th>Quantity</th>
-              <th>Expiration Date</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        </div>
+      </section>
+
+      <!-- Impact Stats -->
+      <section class="impact-section">
+        <h2 class="section-title">Our Impact</h2>
+        <div class="stats-grid">
+          <div class="stat-card stat-card-primary">
+            <div class="stat-icon">📦</div>
+            <div class="stat-value" id="stat-total-items">0</div>
+            <div class="stat-label">Items Available</div>
+          </div>
+          <div class="stat-card stat-card-warning">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-value" id="stat-expiring">0</div>
+            <div class="stat-label">Expiring Soon</div>
+          </div>
+          <div class="stat-card stat-card-success">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value" id="stat-quantity">0</div>
+            <div class="stat-label">Total Quantity</div>
+          </div>
+          <div class="stat-card stat-card-info">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-value" id="stat-recipients">12</div>
+            <div class="stat-label">Active Recipients</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="quick-actions">
+        <div class="action-card" data-action="add-donation">
+          <div class="action-icon">🥗</div>
+          <h3>List Surplus Food</h3>
+          <p>Have extra food? List it for local organizations to claim.</p>
+        </div>
+        <div class="action-card" data-page="donations">
+          <div class="action-icon">📋</div>
+          <h3>Browse Donations</h3>
+          <p>View available food items ready for pickup.</p>
+        </div>
+        <div class="action-card" data-page="alerts">
+          <div class="action-icon">🔔</div>
+          <h3>Check Alerts</h3>
+          <p>See items expiring soon that need attention.</p>
+        </div>
+      </section>
+
+      <!-- Recent Activity -->
+      <section class="activity-section">
+        <h2 class="section-title">Recent Donations</h2>
+        <div class="activity-list" id="recent-donations">
+          <div class="loading-spinner">Loading...</div>
+        </div>
       </section>
     </div>
 
-    <!-- Add Item Page -->
-    <div id="add-page" class="page">
-      <section class="card">
-        <h2>
-          <div class="card-header">
-            <span class="icon">➕</span>
-            <span>Add Food Item</span>
+    <!-- ============ DONATIONS PAGE ============ -->
+    <div id="donations-page" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Food Donations</h1>
+          <p class="page-subtitle">Available food items ready for pickup</p>
+        </div>
+        <button class="btn btn-primary" data-action="add-donation">
+          <span class="btn-icon">➕</span> Add Item
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <input type="text" id="search-donations" placeholder="Search items..." class="search-input" />
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="fresh">Fresh</button>
+          <button class="filter-btn" data-filter="expiring">Expiring Soon</button>
+          <button class="filter-btn" data-filter="urgent">Urgent</button>
+        </div>
+      </div>
+
+      <!-- Donations Grid -->
+      <div class="donations-grid" id="donations-grid">
+        <div class="loading-spinner">Loading donations...</div>
+      </div>
+    </div>
+
+    <!-- ============ RECIPIENTS PAGE ============ -->
+    <div id="recipients-page" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Partner Organizations</h1>
+          <p class="page-subtitle">Food banks, shelters, and community organizations</p>
+        </div>
+        <button class="btn btn-primary" data-action="add-recipient">
+          <span class="btn-icon">🏢</span> Register Organization
+        </button>
+      </div>
+
+      <!-- Recipients Grid -->
+      <div class="recipients-grid" id="recipients-grid">
+        <!-- Food Bank Card -->
+        <div class="recipient-card">
+          <div class="recipient-header">
+            <div class="recipient-icon">🏦</div>
+            <div class="recipient-type">Food Bank</div>
           </div>
-        </h2>
-        <form id="add-form" class="form-grid">
-          <div class="form-row">
+          <h3 class="recipient-name">Central Food Bank</h3>
+          <p class="recipient-address">📍 123 Main Street, Downtown</p>
+          <p class="recipient-hours">🕐 Mon-Fri: 9AM - 5PM</p>
+          <div class="recipient-needs">
+            <span class="need-tag">Canned Goods</span>
+            <span class="need-tag">Fresh Produce</span>
+            <span class="need-tag">Dairy</span>
+          </div>
+          <div class="recipient-capacity">
+            <span class="capacity-label">Current Need Level:</span>
+            <div class="capacity-bar">
+              <div class="capacity-fill" style="width: 75%"></div>
+            </div>
+            <span class="capacity-text">High</span>
+          </div>
+          <button class="btn btn-outline btn-sm">Contact</button>
+        </div>
+
+        <!-- Shelter Card -->
+        <div class="recipient-card">
+          <div class="recipient-header">
+            <div class="recipient-icon">🏠</div>
+            <div class="recipient-type">Shelter</div>
+          </div>
+          <h3 class="recipient-name">Hope Community Shelter</h3>
+          <p class="recipient-address">📍 456 Oak Avenue, Midtown</p>
+          <p class="recipient-hours">🕐 Open 24/7</p>
+          <div class="recipient-needs">
+            <span class="need-tag">Prepared Meals</span>
+            <span class="need-tag">Bread</span>
+            <span class="need-tag">Beverages</span>
+          </div>
+          <div class="recipient-capacity">
+            <span class="capacity-label">Current Need Level:</span>
+            <div class="capacity-bar">
+              <div class="capacity-fill capacity-medium" style="width: 50%"></div>
+            </div>
+            <span class="capacity-text">Medium</span>
+          </div>
+          <button class="btn btn-outline btn-sm">Contact</button>
+        </div>
+
+        <!-- Community Kitchen -->
+        <div class="recipient-card">
+          <div class="recipient-header">
+            <div class="recipient-icon">🍳</div>
+            <div class="recipient-type">Community Kitchen</div>
+          </div>
+          <h3 class="recipient-name">Unity Community Kitchen</h3>
+          <p class="recipient-address">📍 789 Elm Street, Eastside</p>
+          <p class="recipient-hours">🕐 Tue-Sun: 11AM - 7PM</p>
+          <div class="recipient-needs">
+            <span class="need-tag">Fresh Produce</span>
+            <span class="need-tag">Meat</span>
+            <span class="need-tag">Spices</span>
+          </div>
+          <div class="recipient-capacity">
+            <span class="capacity-label">Current Need Level:</span>
+            <div class="capacity-bar">
+              <div class="capacity-fill capacity-high" style="width: 90%"></div>
+            </div>
+            <span class="capacity-text">Critical</span>
+          </div>
+          <button class="btn btn-outline btn-sm">Contact</button>
+        </div>
+
+        <!-- Food Pantry -->
+        <div class="recipient-card">
+          <div class="recipient-header">
+            <div class="recipient-icon">🛒</div>
+            <div class="recipient-type">Food Pantry</div>
+          </div>
+          <h3 class="recipient-name">Neighborhood Food Pantry</h3>
+          <p class="recipient-address">📍 321 Pine Road, Westside</p>
+          <p class="recipient-hours">🕐 Wed & Sat: 10AM - 2PM</p>
+          <div class="recipient-needs">
+            <span class="need-tag">Canned Vegetables</span>
+            <span class="need-tag">Rice</span>
+            <span class="need-tag">Pasta</span>
+          </div>
+          <div class="recipient-capacity">
+            <span class="capacity-label">Current Need Level:</span>
+            <div class="capacity-bar">
+              <div class="capacity-fill capacity-low" style="width: 30%"></div>
+            </div>
+            <span class="capacity-text">Low</span>
+          </div>
+          <button class="btn btn-outline btn-sm">Contact</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ALERTS PAGE ============ -->
+    <div id="alerts-page" class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Expiration Alerts</h1>
+          <p class="page-subtitle">Items that need your attention</p>
+        </div>
+      </div>
+
+      <!-- Alert Categories -->
+      <div class="alert-categories">
+        <div class="alert-category alert-urgent">
+          <div class="alert-category-header">
+            <span class="alert-icon">🚨</span>
+            <h3>Urgent (1-3 days)</h3>
+          </div>
+          <div class="alert-list" id="urgent-alerts">
+            <div class="empty-state-sm">No urgent items</div>
+          </div>
+        </div>
+
+        <div class="alert-category alert-warning">
+          <div class="alert-category-header">
+            <span class="alert-icon">⚠️</span>
+            <h3>Expiring Soon (4-7 days)</h3>
+          </div>
+          <div class="alert-list" id="warning-alerts">
+            <div class="empty-state-sm">No items expiring soon</div>
+          </div>
+        </div>
+
+        <div class="alert-category alert-info">
+          <div class="alert-category-header">
+            <span class="alert-icon">📋</span>
+            <h3>Coming Up (8-14 days)</h3>
+          </div>
+          <div class="alert-list" id="info-alerts">
+            <div class="empty-state-sm">No upcoming expirations</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions for Alerts -->
+      <div class="alert-actions-panel">
+        <h3>Recommended Actions</h3>
+        <div class="action-buttons">
+          <button class="btn btn-warning" id="discount-all">
+            <span class="btn-icon">💰</span> Discount Expiring Items
+          </button>
+          <button class="btn btn-success" id="donate-all">
+            <span class="btn-icon">🎁</span> Donate to Food Bank
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ABOUT PAGE ============ -->
+    <div id="about-page" class="page">
+      <!-- About Hero -->
+      <section class="about-hero">
+        <h1 class="about-title">About <span class="text-gradient">Plateful</span></h1>
+        <p class="about-subtitle">Connecting surplus food with communities in need</p>
+      </section>
+
+      <!-- Mission Section -->
+      <section class="about-section">
+        <div class="about-card">
+          <div class="about-icon">🎯</div>
+          <h2>Our Mission</h2>
+          <p>Plateful is dedicated to reducing food waste while fighting hunger. We connect restaurants, grocery stores, and individuals with local food banks, shelters, and communities in need, creating a more sustainable and equitable food system.</p>
+        </div>
+      </section>
+
+      <!-- Problem Stats -->
+      <section class="problem-section">
+        <h2 class="section-title">The Problem We're Solving</h2>
+        <div class="problem-stats">
+          <div class="problem-stat">
+            <div class="problem-number">1.3B</div>
+            <div class="problem-label">Tons of food wasted globally each year</div>
+          </div>
+          <div class="problem-stat">
+            <div class="problem-number">30-40%</div>
+            <div class="problem-label">Of US food supply is wasted</div>
+          </div>
+          <div class="problem-stat">
+            <div class="problem-number">42M</div>
+            <div class="problem-label">Americans face food insecurity</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works -->
+      <section class="how-it-works">
+        <h2 class="section-title">How It Works</h2>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-icon">📝</div>
+            <h3>List Your Surplus</h3>
+            <p>Businesses and individuals list their surplus food items on our platform with details about quantity and expiration dates.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-icon">🔔</div>
+            <h3>Smart Alerts</h3>
+            <p>Our system automatically tracks expiration dates and sends alerts, recommending donations before items go to waste.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-icon">🤝</div>
+            <h3>Match & Connect</h3>
+            <p>Local food banks and shelters browse available donations and claim items that match their needs.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <div class="step-icon">🚗</div>
+            <h3>Pickup & Deliver</h3>
+            <p>Recipients coordinate pickup, and the food goes to those who need it most—reducing waste and feeding communities.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="cta-section">
+        <h2>Ready to Make a Difference?</h2>
+        <p>Join Plateful today and help us build a world where no food goes to waste.</p>
+        <div class="cta-buttons">
+          <button class="btn btn-primary btn-lg" data-action="add-donation">Start Donating</button>
+          <button class="btn btn-secondary btn-lg" data-action="add-recipient">Register as Recipient</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ ADD DONATION MODAL ============ -->
+    <div class="modal" id="add-donation-modal">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add Food Donation</h2>
+          <button class="modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <form id="add-form" class="donation-form">
+          <div class="form-group">
             <label for="name">Item Name</label>
-            <input id="name" placeholder="e.g., Fresh Bread, Vegetables" required />
+            <input type="text" id="name" placeholder="e.g., Fresh Bread, Vegetables" required />
           </div>
-          <div class="form-row">
-            <label for="qty">Quantity</label>
-            <input id="qty" type="number" min="1" value="1" placeholder="Amount available" required />
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="qty">Quantity</label>
+              <input type="number" id="qty" min="1" value="1" required />
+            </div>
+            <div class="form-group">
+              <label for="exp">Expiration Date</label>
+              <input type="date" id="exp" />
+            </div>
           </div>
-          <div class="form-row">
-            <label for="exp">Expiration Date</label>
-            <input id="exp" type="date" />
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category">
+              <option value="produce">Fresh Produce</option>
+              <option value="dairy">Dairy Products</option>
+              <option value="bakery">Bakery Items</option>
+              <option value="meat">Meat & Poultry</option>
+              <option value="canned">Canned Goods</option>
+              <option value="prepared">Prepared Meals</option>
+              <option value="beverages">Beverages</option>
+              <option value="other">Other</option>
+            </select>
           </div>
-          <button type="submit" class="btn-submit">Add to Inventory</button>
-          <button type="button" class="btn-submit" id="back-btn" style="background: #6b7280;">Back to Inventory</button>
+          <div class="form-group">
+            <label for="notes">Notes (Optional)</label>
+            <textarea id="notes" placeholder="Any additional details about the food item..." rows="3"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Donation</button>
+          </div>
         </form>
-      </section>
+      </div>
     </div>
   </main>
 
-  <footer>
-    <p>Plateful - Reducing food waste, one meal at a time | Built with Node.js + SQL Server</p>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <span class="footer-logo">🍽️</span>
+        <span class="footer-title">Plateful</span>
+      </div>
+      <p class="footer-tagline">Reducing food waste, one meal at a time</p>
+      <div class="footer-links">
+        <a href="#" data-page="about">About</a>
+        <a href="#" data-page="donations">Donations</a>
+        <a href="#" data-page="recipients">Partners</a>
+      </div>
+      <p class="footer-copyright">© 2026 Plateful. Built with 💚 for our communities.</p>
+    </div>
   </footer>
 
   <script src="app.js"></script>

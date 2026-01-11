@@ -55,12 +55,27 @@ app.delete('/api/food/:id', async (req, res) => {
   }
 });
 
+// Dashboard endpoint for aggregated stats
+app.get('/api/dashboard', async (_req, res) => {
+  try {
+    const pool = await getPool();
+    const result = await pool.request()
+      .query(`
+        SELECT 
+          COUNT(*) as totalItems,
+          SUM(Quantity) as totalQuantity,
+          SUM(CASE WHEN ExpirationDate IS NOT NULL AND ExpirationDate <= DATEADD(day, 7, GETDATE()) AND ExpirationDate >= GETDATE() THEN 1 ELSE 0 END) as expiringSoon
+        FROM dbo.FoodItem;
+      `);
+    res.json(result.recordset[0]);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server: http://localhost:${port}`));
-
-appendFile: TextDecoderStream
-
-app.use
 
 //On Windows Terminal command line run:
 //sqllocaldb start MSSQLLocalDB
