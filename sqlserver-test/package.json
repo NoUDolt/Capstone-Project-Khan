@@ -21,9 +21,11 @@
   },
   "homepage": "https://github.com/NoUDolt/Capstone-Project-Khan#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-session": "^1.19.0",
     "msnodesqlv8": "^5.1.1",
     "mssql": "^12.0.0"
   },

@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Plateful – Food Redistribution Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Plateful connects businesses with surplus food to local food banks, shelters, and communities in need. Reduce waste, feed communities." />
+  <meta name="description"
+    content="Plateful connects businesses with surplus food to local food banks, shelters, and communities in need. Reduce waste, feed communities." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <!-- Navigation -->
   <nav class="navbar">
@@ -25,6 +28,12 @@
         <li><a href="#" class="nav-link" data-page="alerts">Alerts</a></li>
         <li><a href="#" class="nav-link" data-page="about">About</a></li>
       </ul>
+      <div class="nav-auth">
+        <span class="nav-user-info" id="nav-user-info" style="display:none;"></span>
+        <button class="btn btn-primary btn-sm" id="nav-login-btn" data-page="login">Login</button>
+        <button class="btn btn-outline btn-sm" id="nav-logout-btn" style="display:none;"
+          data-action="logout">Logout</button>
+      </div>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
         <span></span>
         <span></span>
@@ -40,18 +49,85 @@
     <a href="#" class="nav-link" data-page="recipients">Recipients</a>
     <a href="#" class="nav-link" data-page="alerts">Alerts</a>
     <a href="#" class="nav-link" data-page="about">About</a>
+    <a href="#" class="nav-link" id="mobile-login-btn" data-page="login">Login</a>
+    <a href="#" class="nav-link" id="mobile-logout-btn" style="display:none;" data-action="logout">Logout</a>
   </div>
 
   <main class="main-content">
+    <!-- ============ LOGIN PAGE ============ -->
+    <div id="login-page" class="page">
+      <div class="auth-container">
+        <div class="auth-card">
+          <div class="auth-logo">🍽️</div>
+          <h1 class="auth-title">Welcome to <span class="text-gradient">Plateful</span></h1>
+          <p class="auth-subtitle">Sign in to make a difference</p>
+
+          <!-- Auth Toggle -->
+          <div class="auth-toggle">
+            <button class="auth-toggle-btn active" id="login-toggle">Sign In</button>
+            <button class="auth-toggle-btn" id="register-toggle">Create Account</button>
+          </div>
+
+          <!-- Login Form -->
+          <form id="login-form" class="auth-form">
+            <div class="form-group">
+              <label for="login-username">Username</label>
+              <input type="text" id="login-username" placeholder="Enter your username" required />
+            </div>
+            <div class="form-group">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" placeholder="Enter your password" required />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg auth-submit">Sign In</button>
+          </form>
+
+          <!-- Register Form -->
+          <form id="register-form" class="auth-form" style="display:none;">
+            <div class="form-group">
+              <label for="register-username">Username</label>
+              <input type="text" id="register-username" placeholder="Choose a username" required />
+            </div>
+            <div class="form-group">
+              <label for="register-password">Password</label>
+              <input type="password" id="register-password" placeholder="Choose a password" required />
+            </div>
+            <div class="form-group">
+              <label for="register-role">Account Type</label>
+              <select id="register-role" required>
+                <option value="user">Individual User</option>
+                <option value="company">Company</option>
+                <option value="charity">Charity</option>
+              </select>
+            </div>
+            <div class="form-group" id="org-name-group" style="display:none;">
+              <label for="register-org-name" id="org-name-label">Organization Name</label>
+              <input type="text" id="register-org-name" placeholder="Enter organization name" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg auth-submit">Create Account</button>
+          </form>
+
+          <div class="auth-divider">
+            <span>or</span>
+          </div>
+
+          <button class="btn btn-secondary btn-lg auth-guest" id="guest-btn">
+            <span class="btn-icon">👤</span> Continue as Guest
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ============ DASHBOARD PAGE ============ -->
     <div id="dashboard-page" class="page active">
       <!-- Hero Section -->
       <section class="hero">
         <div class="hero-content">
-          <h1 class="hero-title">Connecting <span class="text-gradient">Surplus Food</span> with Communities in Need</h1>
+          <h1 class="hero-title">Connecting <span class="text-gradient">Surplus Food</span> with Communities in Need
+          </h1>
           <p class="hero-subtitle">Join the movement to reduce food waste and fight hunger in your community</p>
           <div class="hero-actions">
-            <button class="btn btn-primary btn-lg" data-action="add-donation">
+            <button class="btn btn-primary btn-lg auth-required" data-auth-role="user,company,charity,admin"
+              data-action="add-donation">
               <span class="btn-icon">➕</span> Donate Food
             </button>
             <button class="btn btn-secondary btn-lg" data-page="recipients">
@@ -90,7 +166,7 @@
 
       <!-- Quick Actions -->
       <section class="quick-actions">
-        <div class="action-card" data-action="add-donation">
+        <div class="action-card auth-required" data-auth-role="user,company,charity,admin" data-action="add-donation">
           <div class="action-icon">🥗</div>
           <h3>List Surplus Food</h3>
           <p>Have extra food? List it for local organizations to claim.</p>
@@ -123,7 +199,8 @@
           <h1 class="page-title">Food Donations</h1>
           <p class="page-subtitle">Available food items ready for pickup</p>
         </div>
-        <button class="btn btn-primary" data-action="add-donation">
+        <button class="btn btn-primary auth-required" data-auth-role="user,company,charity,admin"
+          data-action="add-donation">
           <span class="btn-icon">➕</span> Add Item
         </button>
       </div>
@@ -154,7 +231,7 @@
           <h1 class="page-title">Partner Organizations</h1>
           <p class="page-subtitle">Food banks, shelters, and community organizations</p>
         </div>
-        <button class="btn btn-primary" data-action="add-recipient">
+        <button class="btn btn-primary auth-required" data-auth-role="charity,admin" data-action="add-recipient">
           <span class="btn-icon">🏢</span> Register Organization
         </button>
       </div>
@@ -328,7 +405,9 @@
         <div class="about-card">
           <div class="about-icon">🎯</div>
           <h2>Our Mission</h2>
-          <p>Plateful is dedicated to reducing food waste while fighting hunger. We connect restaurants, grocery stores, and individuals with local food banks, shelters, and communities in need, creating a more sustainable and equitable food system.</p>
+          <p>Plateful is dedicated to reducing food waste while fighting hunger. We connect restaurants, grocery stores,
+            and individuals with local food banks, shelters, and communities in need, creating a more sustainable and
+            equitable food system.</p>
         </div>
       </section>
 
@@ -359,13 +438,15 @@
             <div class="step-number">1</div>
             <div class="step-icon">📝</div>
             <h3>List Your Surplus</h3>
-            <p>Businesses and individuals list their surplus food items on our platform with details about quantity and expiration dates.</p>
+            <p>Businesses and individuals list their surplus food items on our platform with details about quantity and
+              expiration dates.</p>
           </div>
           <div class="step-card">
             <div class="step-number">2</div>
             <div class="step-icon">🔔</div>
             <h3>Smart Alerts</h3>
-            <p>Our system automatically tracks expiration dates and sends alerts, recommending donations before items go to waste.</p>
+            <p>Our system automatically tracks expiration dates and sends alerts, recommending donations before items go
+              to waste.</p>
           </div>
           <div class="step-card">
             <div class="step-number">3</div>
@@ -377,7 +458,8 @@
             <div class="step-number">4</div>
             <div class="step-icon">🚗</div>
             <h3>Pickup & Deliver</h3>
-            <p>Recipients coordinate pickup, and the food goes to those who need it most—reducing waste and feeding communities.</p>
+            <p>Recipients coordinate pickup, and the food goes to those who need it most—reducing waste and feeding
+              communities.</p>
           </div>
         </div>
       </section>
@@ -387,8 +469,10 @@
         <h2>Ready to Make a Difference?</h2>
         <p>Join Plateful today and help us build a world where no food goes to waste.</p>
         <div class="cta-buttons">
-          <button class="btn btn-primary btn-lg" data-action="add-donation">Start Donating</button>
-          <button class="btn btn-secondary btn-lg" data-action="add-recipient">Register as Recipient</button>
+          <button class="btn btn-primary btn-lg auth-required" data-auth-role="user,company,charity,admin"
+            data-action="add-donation">Start Donating</button>
+          <button class="btn btn-secondary btn-lg auth-required" data-auth-role="charity,admin"
+            data-action="add-recipient">Register as Recipient</button>
         </div>
       </section>
     </div>
@@ -464,4 +548,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>
