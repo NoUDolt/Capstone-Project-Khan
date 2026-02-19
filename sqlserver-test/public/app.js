@@ -66,8 +66,22 @@ const elements = {
   guestBtn: document.getElementById('guest-btn'),
 
   // Toast
-  toastContainer: document.getElementById('toast-container')
+  toastContainer: document.getElementById('toast-container'),
+
+  // Chat
+  chatDrawer: document.getElementById('chat-drawer'),
+  chatMessages: document.getElementById('chat-messages'),
+  chatForm: document.getElementById('chat-form'),
+  chatInput: document.getElementById('chat-input'),
+  chatPartnerName: document.getElementById('chat-partner-name'),
+  chatCloseBtn: document.querySelector('.chat-close'),
+
+  // History
+  historyGrid: document.getElementById('history-grid')
 };
+
+let activeChatPartnerId = null;
+let chatPollInterval = null;
 
 // ============ Initialization ============
 document.addEventListener('DOMContentLoaded', async () => {
@@ -315,6 +329,8 @@ function navigateTo(page) {
     renderDonationsGrid();
   } else if (page === 'alerts') {
     renderAlerts();
+  } else if (page === 'history') {
+    loadHistory();
   }
 }
 
@@ -402,30 +418,37 @@ function initForm() {
   elements.form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const payload = {
-      name: elements.nameInput.value.trim(),
-      quantity: Number(elements.qtyInput.value),
-      expirationDate: elements.expInput.value || null
-    };
+    const formData = new FormData();
+    formData.append('name', elements.nameInput.value.trim());
+    formData.append('quantity', elements.qtyInput.value);
+    formData.append('expirationDate', elements.expInput.value || '');
 
-    if (!payload.name) {
+    // Add file if selected
+    const fileInput = document.getElementById('image');
+    if (fileInput.files.length > 0) {
+      formData.append('image', fileInput.files[0]);
+    }
+
+    if (!elements.nameInput.value.trim()) {
       showToast('Please enter an item name', 'error');
       return;
     }
 
     try {
+      // Note: Do NOT set Content-Type header when sending FormData
+      // The browser sets it automatically with the boundary
       const res = await fetch(`${API}/food`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: formData
       });
 
       if (res.ok) {
         closeModal();
-        showToast(`${payload.name} added to inventory!`, 'success');
+        showToast(`${elements.nameInput.value.trim()} added to inventory!`, 'success');
         await loadData();
       } else {
-        showToast('Failed to add item. Please try again.', 'error');
+        const err = await res.json();
+        showToast(err.error || 'Failed to add item', 'error');
       }
     } catch (e) {
       console.error('Insert failed:', e);
@@ -603,27 +626,78 @@ function renderDonationsGrid() {
     const daysUntil = getDaysUntilExpiration(item.ExpirationDate);
     const badgeClass = getBadgeClass(daysUntil);
     const badgeText = getBadgeText(daysUntil);
-    const emoji = getCategoryEmoji(item.Name);
+    // Use uploaded image if available, else emoji
+    const imageHtml = item.ImageUrl
+      ? `<img src="${item.ImageUrl}" alt="${escapeHtml(item.Name)}" class="donation-img-cover">`
+      : getCategoryEmoji(item.Name);
 
-    let actionsHtml = '';
-    if (canClaim) {
-      actionsHtml += `<button class="btn btn-outline btn-sm" onclick="claimDonation(${item.Id})">Claim</button>`;
+    // Status Badge
+    let statusBadge = '';
+    if (item.Status === 'Pending') {
+      statusBadge = '<span class="status-badge status-pending">Pending Approval</span>';
+    } else if (item.Status === 'Claimed') {
+      statusBadge = '<span class="status-badge status-claimed">Claimed</span>';
     }
-    if (canRemove) {
+
+    // Actions
+    let actionsHtml = '';
+    const isOwner = currentUser && currentUser.id === item.DonorId;
+    const isClaimant = currentUser && currentUser.id === item.ClaimantId;
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const isClaimed = item.Status === 'Claimed';
+
+    // Chat Button:
+    // If user is Owner -> Chat with Claimant (if exists)
+    // If user is NOT Owner -> Chat with Donor (Request Chat / Inquiry)
+    if (currentUser) {
+      if (isOwner && item.ClaimantId) {
+        actionsHtml += `<button class="btn btn-secondary btn-sm" onclick="openChat(${item.ClaimantId}, '${escapeHtml(item.ClaimantName || 'Claimant')}', ${item.Id})">Chat Claimant</button> `;
+      } else if (!isOwner && item.DonorId) {
+        actionsHtml += `<button class="btn btn-secondary btn-sm" onclick="openChat(${item.DonorId}, '${escapeHtml(item.DonorName || 'Donor')}', ${item.Id})">Chat Donor</button> `;
+      }
+    }
+
+    // Claim Button: Only for non-owners, when Available
+    if (currentUser && !isOwner && item.Status === 'Available') {
+      actionsHtml += `<button class="btn btn-outline btn-sm" onclick="claimDonation(${item.Id})">Claim</button> `;
+    }
+
+    // Approve Button: Only for Owner/Admin, when Pending
+    if ((isOwner || isAdmin) && item.Status === 'Pending') {
+      actionsHtml += `<button class="btn btn-success btn-sm" onclick="approveDonation(${item.Id}, '${escapeHtml(item.Name)}')">Approve</button> `;
+    }
+
+    // Cancel Claim Button:
+    // Any of: Owner, Admin, or the current Claimant
+    // Status must be Pending or Claimed
+    if ((isOwner || isAdmin || isClaimant) && (item.Status === 'Pending' || item.Status === 'Claimed')) {
+      actionsHtml += `<button class="btn btn-warning btn-sm" onclick="cancelDonation(${item.Id}, '${escapeHtml(item.Name)}')">Cancel Claim</button> `;
+    }
+
+    // Delete Button: Check new permissions
+    // Owner or Admin can delete
+    // Claimant can delete IF status is Claimed
+    const canDelete = isOwner || isAdmin || (isClaimant && isClaimed) || (isAdmin && item.DonorId === null);
+
+    if (canDelete) {
       actionsHtml += `<button class="btn btn-primary btn-sm" onclick="deleteDonation(${item.Id}, '${escapeHtml(item.Name)}')">Remove</button>`;
     }
 
     return `
-      <div class="donation-card">
+      <div class="donation-card ${item.Status === 'Claimed' ? 'card-claimed' : ''}">
         <div class="donation-image">
-          ${emoji}
+          ${imageHtml}
           <span class="donation-badge ${badgeClass}">${badgeText}</span>
         </div>
         <div class="donation-content">
-          <h3 class="donation-title">${escapeHtml(item.Name)}</h3>
+          <div class="donation-header">
+            <h3 class="donation-title">${escapeHtml(item.Name)}</h3>
+            ${statusBadge}
+          </div>
           <div class="donation-meta">
             <span>📦 Qty: ${item.Quantity}</span>
             <span>📅 ${item.ExpirationDate ? formatDate(item.ExpirationDate) : 'No expiration'}</span>
+            ${item.DonorName ? `<span class="donor-name">👤 ${escapeHtml(item.DonorName)}</span>` : ''}
           </div>
           ${actionsHtml ? `<div class="donation-actions">${actionsHtml}</div>` : ''}
         </div>
@@ -709,15 +783,43 @@ async function deleteDonation(id, name) {
   }
 }
 
-function claimDonation(id) {
+async function claimDonation(id) {
   if (!currentUser) {
     showToast('Please log in to claim items', 'info');
     navigateTo('login');
     return;
   }
-  const item = foodItems.find(i => i.Id === id);
-  if (item) {
-    showToast(`🎉 Claimed "${item.Name}"! Coordinate pickup with the donor.`, 'success');
+
+  try {
+    const res = await fetch(`${API}/food/${id}/claim`, { method: 'POST' });
+    if (res.ok) {
+      showToast('Request sent! Waiting for approval.', 'success');
+      await loadData();
+    } else {
+      const data = await res.json();
+      showToast(data.error || 'Claim failed', 'error');
+    }
+  } catch (e) {
+    console.error('Claim error:', e);
+    showToast('Claim failed', 'error');
+  }
+}
+
+async function approveDonation(id, name) {
+  if (!currentUser) return;
+
+  try {
+    const res = await fetch(`${API}/food/${id}/approve`, { method: 'POST' });
+    if (res.ok) {
+      showToast(`Approved claim for "${name}"!`, 'success');
+      await loadData();
+    } else {
+      const data = await res.json();
+      showToast(data.error || 'Approval failed', 'error');
+    }
+  } catch (e) {
+    console.error('Approve error:', e);
+    showToast('Approval failed', 'error');
   }
 }
 
@@ -733,9 +835,188 @@ function donateToDonation(id) {
   }
 }
 
+async function cancelDonation(id, name) {
+  if (!confirm(`Are you sure you want to cancel the claim for "${name}"? It will become available again.`)) return;
+
+  try {
+    const res = await fetch(`${API}/food/${id}/cancel`, { method: 'POST' });
+    if (res.ok) {
+      showToast('Claim cancelled', 'success');
+      await loadData(); // Reloads current page data
+    } else {
+      const err = await res.json();
+      showToast(err.error || 'Failed to cancel', 'error');
+    }
+  } catch (e) {
+    console.error('Cancel failed', e);
+    showToast('Cancel failed', 'error');
+  }
+}
+
 // Make functions available globally
+// ============ History ============
+async function loadHistory() {
+  if (!currentUser) return;
+  try {
+    const res = await fetch(`${API}/history`);
+    const historyItems = await res.json();
+    renderHistoryGrid(historyItems);
+  } catch (e) {
+    console.error('History error:', e);
+  }
+}
+
+function renderHistoryGrid(items) {
+  const container = elements.historyGrid;
+  if (!container) return;
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty-state">No history found.</div>';
+    return;
+  }
+
+  container.innerHTML = items.map(item => {
+    // Reuse existing grid logic but adapted for history
+    const badgeClass = getBadgeClass(getDaysUntilExpiration(item.ExpirationDate));
+    const badgeText = getBadgeText(getDaysUntilExpiration(item.ExpirationDate));
+    const imageHtml = item.ImageUrl
+      ? `<img src="${item.ImageUrl}" alt="${escapeHtml(item.Name)}" class="donation-img-cover">`
+      : getCategoryEmoji(item.Name);
+
+    let statusLabel = item.Status;
+    // Contextual label
+    if (item.DonorId === currentUser.id) statusLabel = `Donated (${item.Status})`;
+    else if (item.ClaimantId === currentUser.id) statusLabel = `Claimed (${item.Status})`;
+
+    const canDelete = item.DonorId === currentUser.id || currentUser.role === 'admin' || (item.ClaimantId === currentUser.id && item.Status === 'Claimed');
+
+    // Cancel permission in history
+    // Logic matches renderDonationsGrid but simplified for history context
+    const canCancel = (item.Status === 'Pending' || item.Status === 'Claimed');
+
+    // Chat Button logic for History
+    let chatBtn = '';
+    // If I am the donor and there is a claimant -> Chat Claimant
+    if (item.DonorId === currentUser.id && item.ClaimantId) {
+      chatBtn = `<button class="btn btn-secondary btn-sm" onclick="openChat(${item.ClaimantId}, '${escapeHtml(item.ClaimantName || 'Claimant')}', ${item.Id})">Chat Claimant</button>`;
+    }
+    // If I am the claimant -> Chat Donor
+    else if (item.ClaimantId === currentUser.id && item.DonorId) {
+      chatBtn = `<button class="btn btn-secondary btn-sm" onclick="openChat(${item.DonorId}, '${escapeHtml(item.DonorName || 'Donor')}', ${item.Id})">Chat Donor</button>`;
+    }
+
+    return `
+      <div class="donation-card ${item.Status === 'Claimed' ? 'card-claimed' : ''}">
+        <div class="donation-image">
+          ${imageHtml}
+          <span class="donation-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="donation-content">
+          <div class="donation-header">
+            <h3 class="donation-title">${escapeHtml(item.Name)}</h3>
+            <span class="status-badge">${statusLabel}</span>
+          </div>
+          <div class="donation-meta">
+            <span>📦 Qty: ${item.Quantity}</span>
+            <span>📅 ${formatDate(item.ExpirationDate)}</span>
+          </div>
+          <div class="donation-actions">
+             ${chatBtn}
+             ${canCancel ? `<button class="btn btn-warning btn-sm" onclick="cancelDonation(${item.Id}, '${escapeHtml(item.Name)}')">Cancel Claim</button> ` : ''}
+             ${canDelete ? `<button class="btn btn-primary btn-sm" onclick="deleteDonation(${item.Id}, '${escapeHtml(item.Name)}')">Remove</button>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ Chat System ============
+function initChat() {
+  if (elements.chatCloseBtn) {
+    elements.chatCloseBtn.addEventListener('click', closeChat);
+  }
+
+  if (elements.chatForm) {
+    elements.chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = elements.chatInput.value.trim();
+      if (!content || !activeChatPartnerId) return;
+
+      try {
+        await fetch(`${API}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receiverId: activeChatPartnerId, content })
+        });
+        elements.chatInput.value = '';
+        loadMessages(activeChatPartnerId); // Refresh immediately
+      } catch (e) {
+        console.error('Send failed', e);
+      }
+    });
+  }
+}
+
+function openChat(partnerId, partnerName, itemId) {
+  if (!currentUser) {
+    navigateTo('login');
+    return;
+  }
+  activeChatPartnerId = partnerId;
+  elements.chatDrawer.classList.add('active');
+  elements.chatPartnerName.textContent = `Chat with ${partnerName}`;
+  loadMessages(partnerId);
+
+  // Start polling
+  if (chatPollInterval) clearInterval(chatPollInterval);
+  chatPollInterval = setInterval(() => loadMessages(partnerId), 3000);
+}
+
+function closeChat() {
+  elements.chatDrawer.classList.remove('active');
+  activeChatPartnerId = null;
+  if (chatPollInterval) clearInterval(chatPollInterval);
+}
+
+async function loadMessages(partnerId) {
+  if (!activeChatPartnerId || activeChatPartnerId !== partnerId) return;
+
+  try {
+    const res = await fetch(`${API}/messages/${partnerId}`);
+    const messages = await res.json();
+    renderMessages(messages);
+  } catch (e) {
+    console.error('Load messages failed', e);
+  }
+}
+
+function renderMessages(messages) {
+  if (!elements.chatMessages) return;
+
+  const html = messages.map(msg => {
+    const isMe = msg.SenderId === currentUser.id;
+    return `
+        <div class="message ${isMe ? 'message-out' : 'message-in'}">
+            <div class="message-bubble">${escapeHtml(msg.Content)}</div>
+            <div class="message-time">${new Date(msg.Timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+      `;
+  }).join('');
+
+  elements.chatMessages.innerHTML = html;
+  elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+}
+
+// Initialize Chat
+initChat();
+
+// Make function global
+window.openChat = openChat;
 window.deleteDonation = deleteDonation;
 window.claimDonation = claimDonation;
+window.approveDonation = approveDonation;
+window.cancelDonation = cancelDonation;
 window.donateToDonation = donateToDonation;
 
 // ============ Toast Notifications ============

@@ -26,6 +26,8 @@
         <li><a href="#" class="nav-link" data-page="donations">Donations</a></li>
         <li><a href="#" class="nav-link" data-page="recipients">Recipients</a></li>
         <li><a href="#" class="nav-link" data-page="alerts">Alerts</a></li>
+        <li><a href="#" class="nav-link auth-required" data-auth-role="user,company,charity,admin"
+            data-page="history">History</a></li>
         <li><a href="#" class="nav-link" data-page="about">About</a></li>
       </ul>
       <div class="nav-auth">
@@ -477,6 +479,21 @@
       </section>
     </div>
 
+    <!-- Chat Modal/Drawer -->
+    <div id="chat-drawer" class="chat-drawer">
+      <div class="chat-header">
+        <h3 id="chat-partner-name">Chat</h3>
+        <button class="chat-close">&times;</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <!-- Messages go here -->
+      </div>
+      <form id="chat-form" class="chat-form">
+        <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+        <button type="submit" class="btn btn-primary btn-sm">Send</button>
+      </form>
+    </div>
+
     <!-- ============ ADD DONATION MODAL ============ -->
     <div class="modal" id="add-donation-modal">
       <div class="modal-overlay"></div>
@@ -499,6 +516,10 @@
               <label for="exp">Expiration Date</label>
               <input type="date" id="exp" />
             </div>
+          </div>
+          <div class="form-group">
+            <label for="image">Item Image (Optional)</label>
+            <input type="file" id="image" accept="image/*" />
           </div>
           <div class="form-group">
             <label for="category">Category</label>
